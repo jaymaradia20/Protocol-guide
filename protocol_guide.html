@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Clinical Trial Protocol Guide</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Slate Gray & Amber -->
+    <!-- Application Structure Plan: The application is designed as an educational tool with a two-column layout. A fixed sidebar on the left lists various diseases for easy navigation. The main content area on the right dynamically displays protocol information for the selected disease. This structure was chosen for its intuitiveness, allowing a student to easily switch between different therapeutic areas and compare protocol designs. The content for each disease is further organized into Phase II and Phase III tabs, breaking down complex information into digestible, phase-specific sections (Objectives, Criteria, etc.). This guided, exploratory flow is ideal for learning and reference. -->
+    <!-- Visualization & Content Choices: 
+        1. Clinical Trial Phases Diagram -> Goal: Inform/Contextualize -> Method: HTML/Tailwind styled diagram -> Interaction: None, static visual aid -> Justification: Provides a foundational overview of the entire clinical trial process, which is essential context for a student. Avoids complex libraries for a simple, clear visual.
+        2. Phase II vs. Phase III Characteristics Chart -> Goal: Compare -> Method: Grouped Bar Chart -> Interaction: Hover tooltips for precise data -> Justification: Visually quantifies the significant differences in scale (patients, duration) between exploratory and confirmatory phases, making the distinction memorable. -> Library: Chart.js (Canvas).
+        3. Protocol Details (Objectives, Criteria) -> Goal: Inform/Detail -> Method: Structured text in styled cards and lists -> Interaction: Users select a disease from the sidebar and toggle between Phase II/III tabs. -> Justification: Detailed protocol elements are best presented as clear, well-organized text. Cards and lists enhance readability and separate distinct concepts effectively. -> Library: HTML/Tailwind for structure. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        .sidebar-item.active {
+            background-color: #f59e0b;
+            color: white;
+        }
+        .tab-item.active {
+            border-bottom-color: #f59e0b;
+            color: #f59e0b;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body class="text-slate-800">
+    <div class="flex h-screen">
+        <aside id="sidebar" class="w-64 bg-slate-800 text-slate-100 p-4 overflow-y-auto hidden md:block">
+            <h1 class="text-xl font-bold mb-6 text-amber-400">Select a Condition</h1>
+            <nav class="space-y-2">
+                <a href="#" class="sidebar-item block p-3 rounded-lg hover:bg-slate-700 transition-colors duration-200" data-disease="hypertension">Hypertension</a>
+                <a href="#" class="sidebar-item block p-3 rounded-lg hover:bg-slate-700 transition-colors duration-200" data-disease="diabetes">Type 2 Diabetes</a>
+                <a href="#" class="sidebar-item block p-3 rounded-lg hover:bg-slate-700 transition-colors duration-200" data-disease="arthritis">Rheumatoid Arthritis</a>
+                <a href="#" class="sidebar-item block p-3 rounded-lg hover:bg-slate-700 transition-colors duration-200" data-disease="osteoarthritis">Osteoarthritis</a>
+                <a href="#" class="sidebar-item block p-3 rounded-lg hover:bg-slate-700 transition-colors duration-200" data-disease="gout">Gout</a>
+                <a href="#" class="sidebar-item block p-3 rounded-lg hover:bg-slate-700 transition-colors duration-200" data-disease="psoriasis">Psoriasis</a>
+                <a href="#" class="sidebar-item block p-3 rounded-lg hover:bg-slate-700 transition-colors duration-200" data-disease="gerd">GERD</a>
+                <a href="#" class="sidebar-item block p-3 rounded-lg hover:bg-slate-700 transition-colors duration-200" data-disease="ibd">Inflammatory Bowel Disease</a>
+                <a href="#" class="sidebar-item block p-3 rounded-lg hover:bg-slate-700 transition-colors duration-200" data-disease="migraine">Migraine</a>
+                <a href="#" class="sidebar-item block p-3 rounded-lg hover:bg-slate-700 transition-colors duration-200" data-disease="epilepsy">Epilepsy</a>
+                <a href="#" class="sidebar-item block p-3 rounded-lg hover:bg-slate-700 transition-colors duration-200" data-disease="parkinsons">Parkinson's Disease</a>
+                <a href="#" class="sidebar-item block p-3 rounded-lg hover:bg-slate-700 transition-colors duration-200" data-disease="alzheimers">Alzheimer's Disease</a>
+                <a href="#" class="sidebar-item block p-3 rounded-lg hover:bg-slate-700 transition-colors duration-200" data-disease="mdd">Major Depressive Disorder</a>
+                <a href="#" class="sidebar-item block p-3 rounded-lg hover:bg-slate-700 transition-colors duration-200" data-disease="bipolar">Bipolar Disorder</a>
+                <a href="#" class="sidebar-item block p-3 rounded-lg hover:bg-slate-700 transition-colors duration-200" data-disease="anxiety">Anxiety Disorder</a>
+                <a href="#" class="sidebar-item block p-3 rounded-lg hover:bg-slate-700 transition-colors duration-200" data-disease="asthma">Asthma</a>
+                <a href="#" class="sidebar-item block p-3 rounded-lg hover:bg-slate-700 transition-colors duration-200" data-disease="copd">COPD</a>
+                <a href="#" class="sidebar-item block p-3 rounded-lg hover:bg-slate-700 transition-colors duration-200" data-disease="hyperlipidemia">Hyperlipidemia</a>
+                <a href="#" class="sidebar-item block p-3 rounded-lg hover:bg-slate-700 transition-colors duration-200" data-disease="hiv">HIV Infection</a>
+                <a href="#" class="sidebar-item block p-3 rounded-lg hover:bg-slate-700 transition-colors duration-200" data-disease="covid19">COVID-19</a>
+            </nav>
+        </aside>
+
+        <main class="flex-1 p-4 md:p-8 overflow-y-auto">
+            <button id="menu-toggle" class="md:hidden mb-4 p-2 rounded-md bg-slate-200 text-slate-800">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+                </svg>
+            </button>
+            <div id="welcome-screen">
+                <div class="bg-white p-8 rounded-xl shadow-md border border-slate-200">
+                    <h2 class="text-3xl font-bold text-slate-900 mb-4">Welcome to the Interactive Protocol Guide</h2>
+                    <p class="text-slate-600 mb-6">This tool is designed to help pharmacology students understand the key components of clinical trial protocols. Select a disease from the sidebar to explore typical examples for Phase II and Phase III studies. You will find information on objectives, endpoints, and patient selection criteria.</p>
+
+                    <div class="mb-8">
+                        <h3 class="text-xl font-bold text-slate-800 mb-4">The Clinical Trial Journey</h3>
+                        <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0 md:space-x-2 text-center text-sm">
+                            <div class="flex-1 p-3 bg-sky-100 text-sky-800 rounded-lg">
+                                <span class="font-bold block">Phase I</span>
+                                Safety & Dosage
+                            </div>
+                            <div class="text-slate-400 font-bold text-xl">&rarr;</div>
+                            <div class="flex-1 p-3 bg-amber-100 text-amber-800 rounded-lg border-2 border-amber-400">
+                                <span class="font-bold block">Phase II</span>
+                                Efficacy & Side Effects
+                            </div>
+                            <div class="text-slate-400 font-bold text-xl">&rarr;</div>
+                             <div class="flex-1 p-3 bg-amber-100 text-amber-800 rounded-lg border-2 border-amber-400">
+                                <span class="font-bold block">Phase III</span>
+                                Confirm Efficacy, Monitor Safety
+                            </div>
+                            <div class="text-slate-400 font-bold text-xl">&rarr;</div>
+                            <div class="flex-1 p-3 bg-emerald-100 text-emerald-800 rounded-lg">
+                                <span class="font-bold block">Phase IV</span>
+                                Post-Marketing Surveillance
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3 class="text-xl font-bold text-slate-800 mb-4">Phase II vs. Phase III: A Snapshot</h3>
+                        <p class="text-slate-600 mb-4">Phase II and III trials have distinct goals, which dictates their size, duration, and focus. This chart provides a general comparison of these two crucial stages.</p>
+                        <div class="chart-container relative h-80 md:h-96 w-full max-w-2xl mx-auto">
+                            <canvas id="phaseComparisonChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="disease-content" class="hidden">
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const diseaseData = {
+            hypertension: {
+                name: "Hypertension",
+                phase2: {
+                    title: "A Phase II, Randomized, Double-Blind, Placebo-Controlled Study to Evaluate the Efficacy and Safety of Drug-X in Patients with Mild to Moderate Hypertension",
+                    objectives: {
+                        primary: "To evaluate the dose-response relationship of three different doses of Drug-X compared to placebo on systolic blood pressure (SBP).",
+                        secondary: [
+                            "To assess the effect of Drug-X on diastolic blood pressure (DBP).",
+                            "To evaluate the safety and tolerability profile of Drug-X.",
+                            "To assess the pharmacokinetic (PK) profile of Drug-X."
+                        ]
+                    },
+                    endpoints: {
+                        primary: "Change from baseline in mean 24-hour ambulatory SBP at Week 12.",
+                        secondary: [
+                            "Change from baseline in mean 24-hour ambulatory DBP at Week 12.",
+                            "Proportion of patients achieving target blood pressure (<130/80 mmHg).",
+                            "Incidence of adverse events (AEs) and serious adverse events (SAEs).",
+                            "PK parameters (Cmax, AUC)."
+                        ]
+                    },
+                    inclusion: ["Age 18-75 years", "Diagnosis of essential hypertension", "Mean sitting SBP between 140-159 mmHg", "Willingness to undergo ambulatory BP monitoring"],
+                    exclusion: ["Secondary hypertension", "History of myocardial infarction or stroke within 6 months", "Type 1 Diabetes", "Severe renal impairment (eGFR < 30 mL/min)"],
+                    withdrawal: ["Patient request to withdraw consent", "Unacceptable adverse event", "Development of an exclusion criterion", "Significant protocol non-compliance"],
+                    considerations: "Phase II for hypertension focuses on demonstrating a clear dose-dependent effect on a surrogate endpoint like blood pressure. Ambulatory Blood Pressure Monitoring (ABPM) is often the gold standard for endpoints."
+                },
+                phase3: {
+                    title: "A Phase III, Randomized, Double-Blind, Active-Controlled Study to Evaluate the Efficacy and Safety of Drug-X in Reducing Cardiovascular Events in High-Risk Hypertensive Patients",
+                    objectives: {
+                        primary: "To demonstrate the superiority of Drug-X compared to Standard-of-Care (SoC) in reducing the risk of major adverse cardiovascular events (MACE).",
+                        secondary: [
+                            "To evaluate the effect of Drug-X on individual components of the MACE composite endpoint.",
+                            "To assess the long-term safety profile of Drug-X.",
+                            "To compare the effect of Drug-X vs SoC on blood pressure control over time."
+                        ]
+                    },
+                    endpoints: {
+                        primary: "Time to first occurrence of a MACE, defined as a composite of cardiovascular death, non-fatal myocardial infarction, and non-fatal stroke.",
+                        secondary: [
+                            "Time to cardiovascular death.",
+                            "Time to all-cause mortality.",
+                            "Change from baseline in SBP at various time points.",
+                            "Incidence of new-onset diabetes."
+                        ]
+                    },
+                    inclusion: ["Age > 50 years", "Established hypertension", "At least one additional cardiovascular risk factor (e.g., dyslipidemia, smoking, diabetes)", "On stable background antihypertensive therapy"],
+                    exclusion: ["Life expectancy less than 2 years", "Recent MACE event (<3 months)", "Uncontrolled severe hypertension (>180/110 mmHg)", "History of heart failure (NYHA Class IV)"],
+                    withdrawal: ["Confirmed primary endpoint event", "Patient withdraws consent", "Investigator discretion due to safety concerns", "Lost to follow-up"],
+                    considerations: "Phase III trials are large, long, and expensive. They aim to prove a clinical benefit on 'hard' outcomes (like heart attacks or strokes), not just surrogate markers. The choice of an active comparator is critical."
+                },
+            },
+            diabetes: {
+                name: "Type 2 Diabetes Mellitus",
+                phase2: {
+                    title: "A Phase IIb Dose-Ranging Study of Drug-Y as an Add-on to Metformin in Patients with Inadequately Controlled Type 2 Diabetes",
+                    objectives: {
+                        primary: "To assess the efficacy of three doses of Drug-Y compared to placebo in reducing HbA1c.",
+                        secondary: [
+                            "To evaluate the effect of Drug-Y on fasting plasma glucose (FPG) and body weight.",
+                            "To assess the safety and tolerability of Drug-Y.",
+                            "To explore the effect of Drug-Y on lipid profiles."
+                        ]
+                    },
+                    endpoints: {
+                        primary: "Change from baseline in HbA1c at Week 24.",
+                        secondary: [
+                            "Change from baseline in FPG at Week 24.",
+                            "Percentage change from baseline in body weight at Week 24.",
+                            "Incidence of hypoglycemic events.",
+                            "Change from baseline in LDL-C, HDL-C, and Triglycerides."
+                        ]
+                    },
+                    inclusion: ["Diagnosed with Type 2 Diabetes for at least 6 months", "Age 18-70 years", "HbA1c between 7.5% and 10.0%", "On a stable dose of metformin (≥1500 mg/day) for at least 3 months"],
+                    exclusion: ["Type 1 Diabetes", "History of pancreatitis", "Use of insulin or any other anti-diabetic agent besides metformin within 3 months", "Severe renal or hepatic impairment"],
+                    withdrawal: ["Patient withdraws consent", "Clinically significant adverse event", "Persistent severe hyperglycemia as per protocol-defined criteria", "Pregnancy"],
+                    considerations: "The primary endpoint in most diabetes trials is HbA1c, a measure of long-term glucose control. Safety endpoints, especially hypoglycemia and weight gain/loss, are very important."
+                },
+                phase3: {
+                    title: "A Phase III, Multicenter, Randomized, Double-Blind, Placebo-Controlled Cardiovascular Outcomes Trial (CVOT) of Drug-Y in Patients with Type 2 Diabetes and Established Cardiovascular Disease",
+                    objectives: {
+                        primary: "To determine if treatment with Drug-Y, when added to standard of care, reduces the risk of MACE compared to placebo.",
+                        secondary: [
+                            "To assess the effect of Drug-Y on hospitalization for heart failure.",
+                            "To evaluate the effect of Drug-Y on the progression of diabetic kidney disease.",
+                            "To assess the long-term safety of Drug-Y."
+                        ]
+                    },
+                    endpoints: {
+                        primary: "Time to first occurrence of the 3-point MACE composite: cardiovascular death, non-fatal myocardial infarction, or non-fatal stroke.",
+                        secondary: [
+                            "Time to first occurrence of hospitalization for heart failure.",
+                            "A composite renal endpoint (e.g., sustained 40% reduction in eGFR, end-stage renal disease, or renal death).",
+                            "Incidence of SAEs and AEs of special interest."
+                        ]
+                    },
+                    inclusion: ["Age > 40 years", "Diagnosis of Type 2 Diabetes", "Established atherosclerotic cardiovascular disease (e.g., prior MI, stroke, or peripheral artery disease)", "HbA1c ≤ 10.0%"],
+                    exclusion: ["Planned revascularization procedure", "Severe heart failure (NYHA Class IV)", "Recent acute coronary syndrome event (<60 days)", "eGFR < 30 mL/min/1.73m²"],
+                    withdrawal: ["Patient withdraws consent", "Unacceptable adverse event", "Investigator decision", "Lost to follow-up"],
+                    considerations: "For modern diabetes drugs, regulatory agencies often require a dedicated Cardiovascular Outcomes Trial (CVOT) to rule out excess cardiovascular risk, and ideally, to show a benefit. These are major undertakings."
+                },
+            },
+            arthritis: {
+                name: "Rheumatoid Arthritis",
+                phase2: {
+                    title: "A Phase IIa, Proof-of-Concept Study to Evaluate the Efficacy, Safety, and Pharmacodynamics of Drug-Z in Patients with Moderate to Severe Active Rheumatoid Arthritis",
+                    objectives: {
+                        primary: "To evaluate the efficacy of Drug-Z in improving the signs and symptoms of rheumatoid arthritis as measured by the American College of Rheumatology (ACR) 20 response.",
+                        secondary: [
+                            "To assess higher-level responses (ACR50, ACR70).",
+                            "To evaluate the effect on disease activity score (DAS28-CRP).",
+                            "To assess the safety and tolerability profile.",
+                            "To evaluate changes in inflammatory biomarkers."
+                        ]
+                    },
+                    endpoints: {
+                        primary: "Proportion of patients achieving an ACR20 response at Week 12.",
+                        secondary: [
+                            "Proportion of patients achieving ACR50 and ACR70 responses at Week 12.",
+                            "Change from baseline in DAS28-CRP at Week 12.",
+                            "Incidence of AEs, particularly infections.",
+                            "Change from baseline in C-reactive protein (CRP) and erythrocyte sedimentation rate (ESR)."
+                        ]
+                    },
+                    inclusion: ["Diagnosis of Rheumatoid Arthritis (per ACR/EULAR 2010 criteria)", "Active disease (e.g., ≥6 swollen joints and ≥6 tender joints)", "Inadequate response or intolerance to at least one conventional synthetic DMARD (e.g., methotrexate)", "Age 18-75"],
+                    exclusion: ["Prior use of a biologic DMARD", "Active serious infection", "History of latent tuberculosis without appropriate treatment", "Significant comorbidities that could interfere with study assessment"],
+                    withdrawal: ["Patient withdrawal of consent", "Significant AE, especially serious infection", "Lack of efficacy leading to disease flare", "Pregnancy"],
+                    considerations: "ACR20 is a standard primary endpoint for RA Phase II trials. It represents a 20% improvement in a composite score of tender/swollen joints and other patient/physician assessments. Proof-of-concept is key."
+                },
+                phase3: {
+                    title: "A Phase III, Randomized, Double-Blind, Active-Controlled Study of Drug-Z versus Adalimumab in Patients with Moderately to Severely Active Rheumatoid Arthritis with an Inadequate Response to Methotrexate",
+                    objectives: {
+                        primary: "To demonstrate the non-inferiority (or superiority) of Drug-Z compared to adalimumab in improving signs and symptoms of RA.",
+                        secondary: [
+                            "To evaluate the effect of Drug-Z on structural damage progression.",
+                            "To assess improvements in physical function and patient-reported outcomes.",
+                            "To compare the long-term safety profiles of Drug-Z and adalimumab."
+                        ]
+                    },
+                    endpoints: {
+                        primary: "Proportion of patients achieving an ACR20 response at Week 24.",
+                        secondary: [
+                            "Change from baseline in the modified Total Sharp Score (mTSS) on hand/foot X-rays at Week 52.",
+                            "Change from baseline in the Health Assessment Questionnaire-Disability Index (HAQ-DI) at Week 24.",
+                            "Proportion of patients achieving low disease activity (DAS28-CRP < 3.2).",
+                            "Incidence and severity of AEs, including infections and injection-site reactions."
+                        ]
+                    },
+                    inclusion: ["Similar to Phase II but often with a more defined patient population", "Must be on a stable background dose of methotrexate", "Failed at least one conventional DMARD"],
+                    exclusion: ["Previous treatment with more than one biologic DMARD", "History of lymphoproliferative disorders", "Live vaccinations within 3 months of screening"],
+                    withdrawal: ["Patient withdrawal of consent", "Confirmed radiographic progression meeting pre-defined criteria", "Serious adverse event", "Lost to follow-up"],
+                    considerations: "Phase III RA trials often have an active comparator (an existing approved drug) to establish the new drug's place in therapy. Radiographic endpoints (like mTSS) are crucial to show an effect on long-term joint damage."
+                },
+            },
+            osteoarthritis: {
+                name: "Osteoarthritis",
+                phase2: {
+                    title: "A Phase II, Randomized, Placebo-Controlled Study to Evaluate the Efficacy of Drug-OA for Pain Relief in Patients with Knee Osteoarthritis",
+                    objectives: {
+                        primary: "To assess the efficacy of two doses of Drug-OA compared to placebo in reducing pain associated with knee osteoarthritis.",
+                        secondary: ["To evaluate the effect on physical function.", "To assess patient global assessment of disease activity.", "To evaluate safety and tolerability."]
+                    },
+                    endpoints: {
+                        primary: "Change from baseline in the WOMAC Pain subscale score at Week 12.",
+                        secondary: ["Change from baseline in WOMAC Physical Function subscale score.", "Change from baseline in Patient Global Assessment (PGA) on a Visual Analog Scale (VAS).", "Incidence of AEs."]
+                    },
+                    inclusion: ["Age ≥ 40 years", "Diagnosis of knee osteoarthritis (ACR criteria)", "Kellgren-Lawrence grade 2-3 on knee X-ray", "Moderate-to-severe pain (e.g., WOMAC Pain score ≥ 40)"],
+                    exclusion: ["Inflammatory arthritis (e.g., Rheumatoid Arthritis)", "Knee surgery or intra-articular steroid injection within 3 months", "Use of opioids for knee pain"],
+                    withdrawal: ["Patient withdraws consent", "Need for prohibited rescue medication above a certain threshold", "Worsening pain leading to clinical intervention"],
+                    considerations: "Pain and function are the key outcomes in OA. The WOMAC (Western Ontario and McMaster Universities Osteoarthritis Index) is a validated and widely used patient-reported outcome measure."
+                },
+                phase3: {
+                    title: "A Phase III, Long-Term, Randomized, Double-Blind, Placebo- and Active-Controlled Study to Evaluate the Efficacy and Safety of Drug-OA in Patients with Knee Osteoarthritis",
+                    objectives: {
+                        primary: "To confirm the superiority of Drug-OA over placebo in reducing knee pain.",
+                        secondary: ["To demonstrate superiority over placebo in improving physical function.", "To compare the efficacy and safety of Drug-OA to an active comparator (e.g., celecoxib).", "To assess long-term safety over 52 weeks."]
+                    },
+                    endpoints: {
+                        primary: "Change from baseline in WOMAC Pain subscale at Week 12.",
+                        secondary: ["Change from baseline in WOMAC Physical Function subscale at Week 12.", "Proportion of OMERACT-OARSI responders.", "Incidence of SAEs and AEs of special interest (e.g., gastrointestinal, cardiovascular) over 52 weeks."]
+                    },
+                    inclusion: ["Similar to Phase II, but may require a washout of prior pain medications and a documented pain flare to ensure a true treatment effect is measured."],
+                    exclusion: ["Severe structural damage (Kellgren-Lawrence grade 4)", "Contraindications to the active comparator", "Conditions that could confound pain assessment"],
+                    withdrawal: ["Patient withdraws consent", "Lack of efficacy requiring alternative treatment", "Significant adverse event"],
+                    considerations: "Phase III trials often include an active comparator to position the new drug against the current standard of care. Long-term safety is critical, especially for a chronic condition like OA that requires prolonged treatment."
+                },
+            },
+            gout: {
+                name: "Gout",
+                phase2: {
+                    title: "A Phase IIb, Randomized, Double-Blind, Placebo-Controlled, Dose-Ranging Study of Drug-G to Lower Serum Uric Acid in Patients with Gout",
+                    objectives: {
+                        primary: "To evaluate the dose-response of Drug-G in lowering serum uric acid (sUA) levels.",
+                        secondary: ["To assess the proportion of patients achieving target sUA levels.", "To evaluate the safety and tolerability profile."]
+                    },
+                    endpoints: {
+                        primary: "Percent change from baseline in sUA at Week 12.",
+                        secondary: ["Proportion of patients with sUA < 6 mg/dL at Week 12.", "Incidence of gout flares (prophylaxis is typically required).", "Incidence of AEs, especially rash and liver function abnormalities."]
+                    },
+                    inclusion: ["Diagnosis of gout (ACR/EULAR criteria)", "sUA ≥ 8 mg/dL at screening", "History of at least two gout flares in the past year"],
+                    exclusion: ["Secondary hyperuricemia due to other conditions", "Severe renal impairment (e.g., eGFR < 30 mL/min)", "Use of other urate-lowering therapies within 2 weeks"],
+                    withdrawal: ["Patient withdraws consent", "Severe hypersensitivity reaction", "Significant elevation in liver enzymes"],
+                    considerations: "Lowering sUA is a well-accepted surrogate endpoint for gout treatment. Because starting a new urate-lowering therapy can trigger a gout flare, patients are typically given prophylactic treatment (e.g., colchicine or NSAIDs)."
+                },
+                phase3: {
+                    title: "Two Phase III, Randomized, Double-Blind, Allopurinol-Controlled Studies of Drug-G for the Treatment of Hyperuricemia in Gout Patients",
+                    objectives: {
+                        primary: "To demonstrate the superiority of Drug-G compared to allopurinol in achieving target sUA levels.",
+                        secondary: ["To evaluate the effect of Drug-G on the rate of gout flares over a 12-month period.", "To assess the effect on the resolution of tophi (in a sub-population).", "To establish the long-term safety profile."]
+                    },
+                    endpoints: {
+                        primary: "Proportion of patients with sUA < 6 mg/dL at Month 6.",
+                        secondary: ["Mean number of gout flares requiring treatment from Month 6 to Month 12.", "Change from baseline in the size of tophi.", "Incidence of AEs compared to allopurinol."]
+                    },
+                    inclusion: ["Similar to Phase II, but may include patients with more severe disease, such as those with visible tophi or who are intolerant to allopurinol."],
+                    exclusion: ["Alleles associated with hypersensitivity to the comparator (e.g., HLA-B*5801 for allopurinol in certain populations)."],
+                    withdrawal: ["Patient withdraws consent", "Lack of efficacy", "Safety concerns"],
+                    considerations: "Phase III shifts focus from just lowering sUA to demonstrating a clinical benefit (reducing flares) and establishing safety relative to the most common standard of care, allopurinol."
+                },
+            },
+            psoriasis: {
+                name: "Psoriasis",
+                phase2: {
+                    title: "A Phase II, Randomized, Double-Blind, Placebo-Controlled, Dose-Ranging Study to Evaluate the Efficacy and Safety of Drug-P in Subjects with Moderate to Severe Plaque Psoriasis",
+                    objectives: {
+                        primary: "To evaluate the efficacy of three doses of Drug-P in achieving clear or almost clear skin.",
+                        secondary: ["To assess the level of skin improvement.", "To evaluate the impact on patient-reported outcomes like itch.", "To assess the safety profile."]
+                    },
+                    endpoints: {
+                        primary: "Proportion of subjects achieving a Psoriasis Area and Severity Index (PASI) 75 response (i.e., a 75% improvement from baseline) at Week 16.",
+                        secondary: ["Proportion of subjects achieving PASI 90 and PASI 100.", "Proportion of subjects with a static Physician's Global Assessment (sPGA) score of 0 (clear) or 1 (almost clear).", "Incidence of AEs, particularly infections."]
+                    },
+                    inclusion: ["Diagnosis of chronic plaque psoriasis for ≥ 6 months", "Involvement of ≥ 10% of Body Surface Area (BSA)", "PASI score ≥ 12", "Candidate for systemic therapy or phototherapy"],
+                    exclusion: ["Non-plaque forms of psoriasis (e.g., pustular, erythrodermic)", "Active infection", "Prior treatment with a biologic targeting the same pathway"],
+                    withdrawal: ["Patient withdraws consent", "Worsening of psoriasis", "Serious adverse event", "Pregnancy"],
+                    considerations: "PASI 75 is the historical benchmark for psoriasis trials. However, with modern biologics, higher bars like PASI 90 and PASI 100 are now common and important secondary (or even primary) endpoints."
+                },
+                phase3: {
+                    title: "A Phase III Program of Two Multicenter, Randomized, Double-Blind, Placebo- and Active-Controlled Studies of Drug-P in Subjects with Moderate to Severe Plaque Psoriasis",
+                    objectives: {
+                        primary: "To confirm the superiority of Drug-P over placebo in achieving clear or almost clear skin.",
+                        secondary: ["To demonstrate superiority over an active comparator (e.g., adalimumab).", "To evaluate the maintenance of response over 1 year.", "To assess the impact on quality of life."]
+                    },
+                    endpoints: {
+                        primary: "Co-primary endpoints: Proportion of subjects achieving PASI 75 and an sPGA of 0 or 1 at Week 16.",
+                        secondary: ["Proportion of subjects achieving PASI 90 at Week 16 compared to the active comparator.", "Proportion of Week 16 responders who maintain their response at Week 52.", "Change from baseline in the Dermatology Life Quality Index (DLQI)."]
+                    },
+                    inclusion: ["Similar to Phase II, with a large, diverse population to ensure generalizability."],
+                    exclusion: ["Similar to Phase II, with strict criteria regarding prior biologic exposure."],
+                    withdrawal: ["Patient withdraws consent", "Loss of response", "Safety concerns"],
+                    considerations: "Phase III programs in psoriasis are large and often include an active comparator to show competitive efficacy. A withdrawal-rerandomization design is often used in the maintenance phase to assess durability of response."
+                },
+            },
+            gerd: {
+                name: "Gastroesophageal Reflux Disease (GERD)",
+                phase2: {
+                    title: "A Phase II, Randomized, Double-Blind, Placebo-Controlled Study to Evaluate the Efficacy of Drug-R on Symptoms in Patients with Non-Erosive Reflux Disease (NERD)",
+                    objectives: {
+                        primary: "To assess the efficacy of Drug-R compared to placebo in providing relief from heartburn symptoms.",
+                        secondary: ["To evaluate the onset of action.", "To assess the effect on regurgitation.", "To evaluate safety and tolerability."]
+                    },
+                    endpoints: {
+                        primary: "Proportion of days free from heartburn over a 4-week period.",
+                        secondary: ["Time to first sustained resolution of heartburn.", "Change from baseline in a patient-reported symptom diary score.", "Incidence of AEs."]
+                    },
+                    inclusion: ["Clinical diagnosis of GERD", "Frequent heartburn symptoms (e.g., ≥ 4 days/week)", "Normal upper endoscopy (to confirm non-erosive disease)"],
+                    exclusion: ["Erosive esophagitis or Barrett's esophagus", "History of GI surgery that could affect motility", "Use of proton pump inhibitors (PPIs) within 2 weeks"],
+                    withdrawal: ["Patient withdraws consent", "Intolerable symptoms requiring alternative treatment", "Adverse event"],
+                    considerations: "GERD trials rely heavily on patient-reported outcomes from daily diaries. The NERD population is distinct from those with erosive disease and often harder to treat."
+                },
+                phase3: {
+                    title: "A Phase III, Randomized, Double-Blind, Active-Controlled Study of Drug-R for the Healing of Erosive Esophagitis",
+                    objectives: {
+                        primary: "To demonstrate the non-inferiority of Drug-R compared to a standard PPI (e.g., esomeprazole) in healing erosive esophagitis.",
+                        secondary: ["To compare heartburn symptom relief.", "To assess the maintenance of healing at 6 months.", "To compare safety profiles."]
+                    },
+                    endpoints: {
+                        primary: "Proportion of patients with healed erosions (as confirmed by endoscopy) at Week 8.",
+                        secondary: ["Proportion of patients who are heartburn-free at Week 8.", "Proportion of patients who remain healed at Month 6.", "Incidence of AEs, particularly those associated with long-term acid suppression."]
+                    },
+                    inclusion: ["Active erosive esophagitis (Grade C or D by LA classification) confirmed by endoscopy.", "Frequent heartburn symptoms"],
+                    exclusion: ["Refractory GERD (failed previous PPI therapy)", "Conditions that impair esophageal healing"],
+                    withdrawal: ["Patient withdraws consent", "Failure to heal or worsening of esophagitis", "Significant safety concern"],
+                    considerations: "For erosive esophagitis, the primary endpoint is objective: endoscopic evidence of healing. Non-inferiority to an existing PPI is often the goal, with the new drug potentially offering advantages in safety, dosing, or speed of onset."
+                },
+            },
+            ibd: {
+                name: "Inflammatory Bowel Disease (Crohn's/UC)",
+                phase2: {
+                    title: "A Phase II, Randomized, Double-Blind, Placebo-Controlled Induction Study of Drug-IBD in Patients with Moderately to Severely Active Ulcerative Colitis",
+                    objectives: {
+                        primary: "To evaluate the efficacy of Drug-IBD in inducing clinical remission.",
+                        secondary: ["To assess the effect on clinical response and endoscopic improvement.", "To evaluate safety and pharmacokinetics."]
+                    },
+                    endpoints: {
+                        primary: "Proportion of patients in clinical remission (defined by Mayo score) at Week 8.",
+                        secondary: ["Proportion of patients achieving clinical response.", "Proportion of patients with endoscopic improvement (Mayo endoscopic subscore of 0 or 1).", "Incidence of AEs, especially infections and infusion reactions."]
+                    },
+                    inclusion: ["Diagnosis of Ulcerative Colitis", "Moderately to severely active disease (e.g., Mayo score 6-12)", "Inadequate response or intolerance to conventional therapies (e.g., 5-ASAs, corticosteroids)"],
+                    exclusion: ["Diagnosis of Crohn's disease or indeterminate colitis", "Active C. difficile infection", "History of colectomy"],
+                    withdrawal: ["Patient withdraws consent", "Worsening of disease requiring surgery (colectomy)", "Serious adverse event"],
+                    considerations: "IBD trials have two phases: a short 'induction' phase to get the disease under control, and a longer 'maintenance' phase. Endpoints are composite scores (like the Mayo score) that include patient symptoms, physician assessment, and endoscopy."
+                },
+                phase3: {
+                    title: "A Phase III Program of Induction and Maintenance Studies of Drug-IBD in Patients with Moderately to Severely Active Crohn's Disease",
+                    objectives: {
+                        primary: "To confirm the efficacy of Drug-IBD in inducing and maintaining clinical remission.",
+                        secondary: ["To evaluate the effect on endoscopic response and mucosal healing.", "To assess the ability to achieve corticosteroid-free remission.", "To evaluate long-term safety."]
+                    },
+                    endpoints: {
+                        primary: "Induction: Proportion of patients in clinical remission (CDAI < 150) at Week 12. Maintenance: Proportion of Week 12 responders who are in clinical remission at Week 52.",
+                        secondary: ["Proportion of patients with endoscopic response (e.g., >50% improvement in SES-CD score).", "Proportion of patients in remission at Week 52 who are not taking corticosteroids.", "Incidence of SAEs, infections, and malignancies over the long term."]
+                    },
+                    inclusion: ["Diagnosis of Crohn's Disease", "Moderately to severely active disease (CDAI score 220-450)", "Evidence of active inflammation on endoscopy or imaging", "Failed conventional or biologic therapy"],
+                    exclusion: ["Conditions mimicking Crohn's (e.g., intestinal tuberculosis)", "Presence of a stoma or short bowel syndrome"],
+                    withdrawal: ["Patient withdraws consent", "Disease progression requiring surgery", "Loss of response"],
+                    considerations: "Phase III programs are complex. Patients who respond in the induction study are re-randomized into the maintenance study to assess durability. Corticosteroid-sparing is a very important endpoint, as long-term steroid use has severe side effects."
+                },
+            },
+            epilepsy: {
+                name: "Epilepsy",
+                phase2: {
+                    title: "A Phase II, Randomized, Double-Blind, Placebo-Controlled, Add-On Study to Evaluate the Efficacy and Safety of Drug-E in Patients with Drug-Resistant Focal Onset Seizures",
+                    objectives: {
+                        primary: "To evaluate the efficacy of two doses of Drug-E in reducing seizure frequency.",
+                        secondary: ["To assess the proportion of patients with a significant reduction in seizures.", "To evaluate safety and tolerability."]
+                    },
+                    endpoints: {
+                        primary: "Median percent reduction from baseline in focal onset seizure frequency over the 12-week treatment period.",
+                        secondary: ["Proportion of patients with a ≥50% reduction in seizure frequency (50% responder rate).", "Incidence and severity of treatment-emergent adverse events (TEAEs), especially CNS-related events (e.g., dizziness, somnolence)."]
+                    },
+                    inclusion: ["Diagnosis of epilepsy with focal onset seizures", "Failure to achieve seizure control with ≥2 prior anti-epileptic drugs (AEDs)", "On a stable regimen of 1-3 background AEDs", "A minimum number of seizures during the baseline period (e.g., ≥4 per month)"],
+                    exclusion: ["Exclusively generalized seizures", "Pseudo-seizures", "Progressive neurological disease"],
+                    withdrawal: ["Patient withdraws consent", "Status epilepticus or significant increase in seizure frequency", "Intolerable adverse events"],
+                    considerations: "Epilepsy trials require a stable baseline period (typically 8 weeks) where patients record all seizures in a diary. The primary endpoint is the reduction in seizure frequency compared to placebo when the drug is added to the patient's existing medications."
+                },
+                phase3: {
+                    title: "A Phase III, Randomized, Double-Blind, Placebo-Controlled, Add-On Study to Confirm the Efficacy and Safety of Drug-E in Patients with Drug-Resistant Focal Onset Seizures",
+                    objectives: {
+                        primary: "To confirm the efficacy of Drug-E in reducing seizure frequency.",
+                        secondary: ["To evaluate the proportion of patients who become seizure-free.", "To assess the long-term safety and maintenance of effect in an open-label extension."]
+                    },
+                    endpoints: {
+                        primary: "Median percent reduction from baseline in focal onset seizure frequency.",
+                        secondary: ["Proportion of patients who are seizure-free during the treatment period.", "Safety and tolerability data from the long-term extension study.", "Effects on quality of life (e.g., QOLIE-31 scale)."]
+                    },
+                    inclusion: ["Similar to Phase II, with a large population across multiple centers to ensure robust results."],
+                    exclusion: ["Similar to Phase II."],
+                    withdrawal: ["Patient withdraws consent", "Safety concerns", "Lack of efficacy"],
+                    considerations: "Like MDD, regulatory agencies usually require at least two positive Phase III trials for epilepsy drugs. The consistency of the results is key. The ultimate goal is seizure freedom, making that an important secondary endpoint."
+                },
+            },
+            parkinsons: {
+                name: "Parkinson's Disease",
+                phase2: {
+                    title: "A Phase IIa, Proof-of-Concept Study to Evaluate the Efficacy of Drug-PD as an Adjunctive Therapy in Reducing Motor Fluctuations in Parkinson's Disease",
+                    objectives: {
+                        primary: "To assess the efficacy of Drug-PD in reducing 'OFF' time in patients with Parkinson's disease experiencing motor fluctuations.",
+                        secondary: ["To evaluate the effect on overall motor symptoms.", "To assess safety and tolerability."]
+                    },
+                    endpoints: {
+                        primary: "Change from baseline in total daily 'OFF' time, as recorded in patient diaries.",
+                        secondary: ["Change from baseline in the Movement Disorder Society-Unified Parkinson's Disease Rating Scale (MDS-UPDRS) Part III (Motor Examination) score.", "Increase in 'ON' time without troublesome dyskinesia.", "Incidence of AEs, particularly dopaminergic side effects (e.g., nausea, orthostatic hypotension)."]
+                    },
+                    inclusion: ["Diagnosis of idiopathic Parkinson's disease", "Treated with levodopa and experiencing at least 2.5 hours of 'OFF' time per day", "Stable background anti-Parkinsonian medication regimen"],
+                    exclusion: ["Atypical parkinsonism", "Dementia that would interfere with diary completion", "Use of prohibited concomitant medications (e.g., certain antipsychotics)"],
+                    withdrawal: ["Patient withdraws consent", "Intolerable dyskinesia or other AEs", "Worsening of motor symptoms"],
+                    considerations: "'OFF' time is the period when levodopa effects wear off and motor symptoms (tremor, rigidity) return. Reducing this time is a primary goal for adjunctive therapies. Patient diaries are crucial for capturing this endpoint."
+                },
+                phase3: {
+                    title: "A Phase III, Randomized, Double-Blind, Placebo-Controlled Study to Evaluate the Efficacy and Safety of Drug-PD in Reducing 'OFF' Time in Levodopa-Treated Parkinson's Disease Patients",
+                    objectives: {
+                        primary: "To confirm the efficacy of Drug-PD in reducing 'OFF' time.",
+                        secondary: ["To demonstrate improvement in motor function.", "To assess effects on non-motor symptoms and quality of life.", "To evaluate long-term safety."]
+                    },
+                    endpoints: {
+                        primary: "Change from baseline in total daily 'OFF' time at Week 12.",
+                        secondary: ["Change from baseline in MDS-UPDRS Part III score.", "Change from baseline in the Parkinson's Disease Questionnaire (PDQ-39) for quality of life.", "Incidence of SAEs over a 52-week period."]
+                    },
+                    inclusion: ["Similar to Phase II, but with a larger, more diverse patient population."],
+                    exclusion: ["Similar to Phase II."],
+                    withdrawal: ["Patient withdraws consent", "Safety concerns", "Lack of perceived benefit"],
+                    considerations: "Phase III trials must demonstrate a clinically meaningful benefit. This means not only reducing 'OFF' time (the primary endpoint) but also showing that this translates to better motor function (UPDRS) and potentially improved quality of life (PDQ-39)."
+                },
+            },
+            alzheimers: {
+                name: "Alzheimer's Disease",
+                phase2: {
+                    title: "A Phase II, Randomized, Double-Blind, Placebo-Controlled Study to Evaluate the Effect of Drug-AD on Brain Amyloid-Beta Plaque Load in Early Alzheimer's Disease",
+                    objectives: {
+                        primary: "To assess the effect of Drug-AD on a key pathophysiological marker of Alzheimer's disease.",
+                        secondary: ["To explore the effects on other biomarkers (e.g., tau).", "To assess the effects on cognitive and functional measures.", "To evaluate safety, especially Amyloid-Related Imaging Abnormalities (ARIA)."]
+                    },
+                    endpoints: {
+                        primary: "Change from baseline in brain amyloid plaque load as measured by Amyloid PET imaging at 18 months.",
+                        secondary: ["Change from baseline in CSF or plasma biomarkers (e.g., p-tau181).", "Change from baseline in cognitive scales like the ADAS-Cog 13.", "Incidence of ARIA-E (edema) and ARIA-H (hemorrhage) on MRI scans."]
+                    },
+                    inclusion: ["Diagnosis of Mild Cognitive Impairment (MCI) due to Alzheimer's or mild Alzheimer's dementia", "Age 50-85", "Confirmed evidence of amyloid pathology via PET scan or CSF test"],
+                    exclusion: ["Other causes of dementia", "History of stroke or other significant neurological disease", "Contraindications to MRI (e.g., pacemaker)"],
+                    withdrawal: ["Patient or caregiver withdraws consent", "Significant adverse event, such as symptomatic ARIA", "Rapid clinical decline"],
+                    considerations: "Modern AD trials focus on early-stage disease and require biomarker confirmation of pathology. Phase II often focuses on a 'biomarker' endpoint (like amyloid clearance) to prove the drug is hitting its target, with clinical outcomes being exploratory."
+                },
+                phase3: {
+                    title: "A Phase III, Randomized, Double-Blind, Placebo-Controlled Study to Evaluate the Efficacy and Safety of Drug-AD in Slowing Clinical Progression in Early Alzheimer's Disease",
+                    objectives: {
+                        primary: "To determine if Drug-AD slows the rate of clinical decline compared to placebo.",
+                        secondary: ["To assess the effect on cognitive function.", "To assess the effect on functional ability (activities of daily living).", "To confirm the effect on biomarkers."]
+                    },
+                    endpoints: {
+                        primary: "Change from baseline in the Clinical Dementia Rating-Sum of Boxes (CDR-SB) score at 18 months.",
+                        secondary: ["Change from baseline in ADAS-Cog 13 (cognition).", "Change from baseline in ADCS-iADL (instrumental activities of daily living).", "Change from baseline in amyloid PET and tau biomarkers.", "Long-term safety, with continued monitoring for ARIA."]
+                    },
+                    inclusion: ["Similar to Phase II, with very strict cognitive and functional entry criteria."],
+                    exclusion: ["Similar to Phase II, with careful screening for cerebrovascular disease."],
+                    withdrawal: ["Patient/caregiver withdraws consent", "Safety concerns", "Investigator discretion"],
+                    considerations: "Phase III trials are long, large, and extremely expensive. The primary endpoint must be a 'clinical' one that measures a meaningful change in the patient's overall disease state. The CDR-SB is the current standard as it combines both cognitive and functional assessment."
+                },
+            },
+            bipolar: {
+                name: "Bipolar Disorder",
+                phase2: {
+                    title: "A Phase II, Randomized, Double-Blind, Placebo-Controlled Study of Drug-BP as an Adjunctive Treatment for a Major Depressive Episode in Bipolar I Disorder",
+                    objectives: {
+                        primary: "To evaluate the efficacy of Drug-BP in reducing depressive symptoms in patients with bipolar depression.",
+                        secondary: ["To assess the rate of response and remission.", "To evaluate safety, with a focus on treatment-emergent mania."]
+                    },
+                    endpoints: {
+                        primary: "Change from baseline in the Montgomery-Åsberg Depression Rating Scale (MADRS) total score at Week 6.",
+                        secondary: ["Proportion of responders (≥50% MADRS reduction) and remitters (MADRS ≤12).", "Incidence of treatment-emergent mania or hypomania, as measured by the Young Mania Rating Scale (YMRS)."]
+                    },
+                    inclusion: ["Diagnosis of Bipolar I Disorder, currently in a Major Depressive Episode", "MADRS score ≥ 20", "On a stable dose of a mood stabilizer (e.g., lithium, valproate)"],
+                    exclusion: ["Bipolar II Disorder or other psychiatric conditions as primary diagnosis", "Recent manic or mixed episode", "Significant suicide risk"],
+                    withdrawal: ["Patient withdraws consent", "Switch to mania or hypomania", "Intolerable adverse events"],
+                    considerations: "The key challenge in treating bipolar depression is to improve depression without inducing a switch into mania. Therefore, safety monitoring with a scale like the YMRS is just as important as the efficacy endpoint (MADRS)."
+                },
+                phase3: {
+                    title: "A Phase III, Randomized, Double-Blind, Placebo-Controlled Monotherapy Study of Drug-BP for the Acute Treatment of a Manic Episode in Bipolar I Disorder",
+                    objectives: {
+                        primary: "To confirm the efficacy of Drug-BP in reducing the symptoms of acute mania.",
+                        secondary: ["To assess the speed of onset of anti-manic effects.", "To evaluate safety and tolerability."]
+                    },
+                    endpoints: {
+                        primary: "Change from baseline in the Young Mania Rating Scale (YMRS) total score at Week 3.",
+                        secondary: ["Proportion of patients with ≥50% reduction in YMRS score.", "Time to onset of significant clinical improvement.", "Incidence of AEs, particularly sedation, and extrapyramidal symptoms (EPS)."]
+                    },
+                    inclusion: ["Diagnosis of Bipolar I Disorder, currently experiencing an acute manic or mixed episode", "YMRS score ≥ 20", "May require hospitalization for symptom severity"],
+                    exclusion: ["Rapid cycling bipolar disorder", "Substance-induced mania"],
+                    withdrawal: ["Patient withdraws consent", "Lack of efficacy requiring rescue medication", "Significant safety concerns"],
+                    considerations: "Mania trials are often conducted in an inpatient setting due to the severity of the illness. The YMRS is the gold standard for measuring manic symptoms. A rapid reduction in symptoms is a key goal."
+                },
+            },
+            anxiety: {
+                name: "Anxiety Disorder",
+                phase2: {
+                    title: "A Phase II, Randomized, Double-Blind, Placebo-Controlled, Flexible-Dose Study of Drug-ANX for the Treatment of Generalized Anxiety Disorder (GAD)",
+                    objectives: {
+                        primary: "To evaluate the efficacy of Drug-ANX in reducing the symptoms of GAD.",
+                        secondary: ["To assess the effect on functional impairment.", "To evaluate safety and tolerability."]
+                    },
+                    endpoints: {
+                        primary: "Change from baseline in the Hamilton Anxiety Rating Scale (HAM-A) total score at Week 8.",
+                        secondary: ["Change from baseline in the Sheehan Disability Scale (SDS).", "Proportion of patients achieving a response (≥50% reduction in HAM-A).", "Incidence of TEAEs."]
+                    },
+                    inclusion: ["Diagnosis of GAD according to DSM-5 criteria", "HAM-A score ≥ 20", "Symptoms present for at least 6 months"],
+                    exclusion: ["Primary diagnosis of another anxiety disorder (e.g., Panic Disorder, PTSD) or MDD", "Significant suicide risk", "Recent use of benzodiazepines"],
+                    withdrawal: ["Patient withdraws consent", "Worsening of anxiety or emergence of suicidal ideation", "Intolerable side effects"],
+                    considerations: "Like MDD trials, GAD trials can have a high placebo response rate. Careful patient selection and rater training are essential. The HAM-A is the standard clinician-rated scale for anxiety."
+                },
+                phase3: {
+                    title: "A Phase III, Long-Term, Relapse Prevention, Randomized, Double-Blind, Placebo-Controlled Study of Drug-ANX in Patients with Generalized Anxiety Disorder",
+                    objectives: {
+                        primary: "To evaluate the ability of Drug-ANX to prevent relapse in patients who have responded to initial treatment.",
+                        secondary: ["To assess the long-term safety and tolerability of Drug-ANX."]
+                    },
+                    endpoints: {
+                        primary: "Time to first relapse during the double-blind, placebo-controlled phase.",
+                        secondary: ["Proportion of patients who relapse.", "Incidence of AEs during long-term exposure."]
+                    },
+                    inclusion: ["Patients with GAD who have successfully completed an open-label lead-in study with Drug-ANX and met response criteria."],
+                    exclusion: ["Patients who did not tolerate or respond to Drug-ANX in the open-label phase."],
+                    withdrawal: ["Relapse of GAD symptoms", "Patient withdraws consent", "Adverse event"],
+                    considerations: "A relapse prevention design is common for Phase III trials of chronic conditions. All patients first receive the active drug. Those who get better ('responders') are then randomized to either continue the drug or switch to a placebo. The study then measures how long it takes for the placebo group to relapse compared to the drug group."
+                },
+            },
+            copd: {
+                name: "COPD",
+                phase2: {
+                    title: "A Phase IIb, Randomized, Double-Blind, Placebo-Controlled Study to Evaluate the Effect of Inhaled Drug-COPD on Lung Function in Patients with Moderate to Severe COPD",
+                    objectives: {
+                        primary: "To evaluate the bronchodilator effect of three doses of Drug-COPD.",
+                        secondary: ["To assess the duration of action.", "To evaluate safety and tolerability."]
+                    },
+                    endpoints: {
+                        primary: "Change from baseline in trough Forced Expiratory Volume in 1 second (FEV1) at Week 12.",
+                        secondary: ["Peak FEV1 and serial FEV1 measurements over 24 hours post-dose.", "Incidence of AEs, particularly cardiovascular and respiratory events."]
+                    },
+                    inclusion: ["Diagnosis of COPD", "Age ≥ 40 years", "Post-bronchodilator FEV1/FVC ratio < 0.70", "Post-bronchodilator FEV1 < 80% of predicted", "Smoking history of ≥ 10 pack-years"],
+                    exclusion: ["Diagnosis of asthma", "Recent COPD exacerbation (<6 weeks)", "Clinically significant cardiovascular disease"],
+                    withdrawal: ["Patient withdraws consent", "Significant adverse event", "Worsening of respiratory symptoms"],
+                    considerations: "The primary goal in Phase II for a COPD maintenance therapy is to demonstrate a statistically and clinically significant improvement in lung function, measured by FEV1. Trough FEV1 (measured just before the next dose) is a key indicator of 24-hour efficacy."
+                },
+                phase3: {
+                    title: "Two Replicate, 52-Week, Randomized, Double-Blind, Placebo-Controlled Studies to Evaluate the Effect of Drug-COPD on the Rate of Exacerbations in Patients with Severe COPD",
+                    objectives: {
+                        primary: "To determine if Drug-COPD reduces the rate of moderate or severe COPD exacerbations.",
+                        secondary: ["To assess the effect on lung function over the long term.", "To evaluate the effect on symptoms and health status.", "To assess long-term safety."]
+                    },
+                    endpoints: {
+                        primary: "Annualized rate of moderate or severe COPD exacerbations.",
+                        secondary: ["Change from baseline in trough FEV1 at Week 52.", "Change from baseline in the St. George's Respiratory Questionnaire (SGRQ) total score.", "Time to first exacerbation."]
+                    },
+                    inclusion: ["Diagnosis of severe or very severe COPD", "History of ≥ 1 moderate or severe exacerbation in the past year", "On background respiratory therapy"],
+                    exclusion: ["Similar to Phase II."],
+                    withdrawal: ["Patient withdraws consent", "Safety concerns", "Lost to follow-up"],
+                    considerations: "Similar to severe asthma, the main goal in Phase III for COPD is to show a reduction in exacerbations, which are major drivers of morbidity and mortality. This is considered a more clinically relevant endpoint than FEV1 alone. These trials are typically one year long."
+                },
+            },
+            hyperlipidemia: {
+                name: "Hyperlipidemia",
+                phase2: {
+                    title: "A Phase IIb, Randomized, Double-Blind, Placebo-Controlled, Dose-Ranging Study to Evaluate the Efficacy and Safety of Drug-LIPID in Subjects with Hypercholesterolemia",
+                    objectives: {
+                        primary: "To evaluate the dose-response relationship of Drug-LIPID on low-density lipoprotein cholesterol (LDL-C).",
+                        secondary: ["To assess the effects on other lipid parameters (HDL-C, Triglycerides, ApoB).", "To evaluate safety and tolerability."]
+                    },
+                    endpoints: {
+                        primary: "Percent change from baseline in calculated LDL-C at Week 12.",
+                        secondary: ["Percent change from baseline in other lipid and lipoprotein parameters.", "Incidence of AEs, with a focus on muscle-related symptoms and liver enzyme elevations."]
+                    },
+                    inclusion: ["Elevated LDL-C despite stable diet (e.g., LDL-C ≥ 130 mg/dL)", "May or may not be on a stable statin therapy background", "Low to moderate cardiovascular risk"],
+                    exclusion: ["Familial hypercholesterolemia requiring more aggressive treatment", "Recent cardiovascular event", "Uncontrolled diabetes or thyroid disease"],
+                    withdrawal: ["Patient withdraws consent", "Clinically significant elevations in liver enzymes (ALT/AST > 3x ULN)", "Development of severe myopathy"],
+                    considerations: "LDL-C reduction is a well-established surrogate endpoint for cardiovascular risk. Phase II trials are designed to find the optimal dose that provides the best efficacy-to-safety ratio before moving into large, expensive outcomes trials."
+                },
+                phase3: {
+                    title: "A Phase III, Randomized, Double-Blind, Placebo-Controlled, Multicenter Study to Evaluate the Impact of Drug-LIPID on Major Cardiovascular Events in High-Risk Subjects (A Cardiovascular Outcomes Trial - CVOT)",
+                    objectives: {
+                        primary: "To determine if treatment with Drug-LIPID, on top of standard of care, reduces the risk of major adverse cardiovascular events (MACE).",
+                        secondary: ["To evaluate the effect on individual components of the MACE composite.", "To assess the long-term safety of Drug-LIPID."]
+                    },
+                    endpoints: {
+                        primary: "Time to first occurrence of a MACE, defined as a composite of cardiovascular death, non-fatal myocardial infarction, and non-fatal stroke.",
+                        secondary: ["Time to each component of the primary endpoint.", "Time to hospitalization for unstable angina or urgent revascularization.", "Time to all-cause mortality."]
+                    },
+                    inclusion: ["High cardiovascular risk population", "Examples: Patients with established atherosclerotic cardiovascular disease (ASCVD), or patients with diabetes plus other risk factors", "LDL-C above a certain threshold (e.g., > 70 mg/dL) despite maximally tolerated statin therapy"],
+                    exclusion: ["Recent acute coronary syndrome (<3 months)", "Severe heart failure", "Life expectancy less than the trial duration"],
+                    withdrawal: ["Patient withdraws consent", "Confirmed primary endpoint event", "Lost to follow-up"],
+                    considerations: "For lipid-lowering drugs, demonstrating a reduction in LDL-C is not enough for broad approval. A CVOT is required to prove that this LDL-C reduction actually translates into fewer heart attacks and strokes. These trials are very large (10,000-25,000 patients) and long (3-5 years)."
+                },
+            },
+            hiv: {
+                name: "HIV Infection",
+                phase2: {
+                    title: "A Phase IIb, Randomized, Partially-Blinded Study to Evaluate the Antiviral Activity, Safety, and Dose Response of Drug-HIV in Combination with a Backbone Regimen in Treatment-Naïve HIV-1 Infected Adults",
+                    objectives: {
+                        primary: "To evaluate the antiviral efficacy of three doses of Drug-HIV over 48 weeks.",
+                        secondary: ["To assess the change in CD4+ T-cell count.", "To evaluate the incidence of virologic failure and resistance development.", "To assess safety and tolerability."]
+                    },
+                    endpoints: {
+                        primary: "Proportion of subjects with HIV-1 RNA < 50 copies/mL at Week 48 (FDA Snapshot algorithm).",
+                        secondary: ["Mean change from baseline in CD4+ T-cell count.", "Genotypic and phenotypic characterization of virus from subjects with virologic failure.", "Incidence of Grade 3 or 4 adverse events and laboratory abnormalities."]
+                    },
+                    inclusion: ["HIV-1 infection confirmed", "Treatment-naïve (no prior antiretroviral therapy)", "HIV-1 RNA > 1,000 copies/mL", "No known resistance to the background regimen"],
+                    exclusion: ["Active opportunistic infection (e.g., active tuberculosis)", "Pregnancy", "Significant renal or hepatic impairment"],
+                    withdrawal: ["Patient withdraws consent", "Virologic failure with documented resistance", "Pregnancy", "Significant toxicity"],
+                    considerations: "The goal of HIV treatment is durable virologic suppression. The primary endpoint is the proportion of patients with an 'undetectable' viral load. The FDA's 'Snapshot' algorithm is a specific intent-to-treat analysis that handles missing data conservatively."
+                },
+                phase3: {
+                    title: "Two Phase III, Randomized, Double-Blind, Active-Controlled Studies to Evaluate the Efficacy and Safety of a Fixed-Dose Combination of Drug-HIV/Drug-Backbone versus a Standard of Care Regimen in Treatment-Naïve HIV-1 Infected Adults",
+                    objectives: {
+                        primary: "To demonstrate the non-inferiority of the new regimen compared to a current standard of care regimen in achieving virologic suppression.",
+                        secondary: ["To compare the safety and tolerability profiles.", "To assess the barrier to resistance.", "To compare the effect on CD4+ T-cell recovery."]
+                    },
+                    endpoints: {
+                        primary: "Proportion of subjects with HIV-1 RNA < 50 copies/mL at Week 48 (FDA Snapshot algorithm).",
+                        secondary: ["Proportion of subjects with virologic failure and the incidence of emergent resistance.", "Incidence of discontinuation due to adverse events.", "Mean change from baseline in CD4+ T-cell count."]
+                    },
+                    inclusion: ["Similar to Phase II, but with a larger, more globally representative population."],
+                    exclusion: ["Known resistance to any of the drugs in either study arm."],
+                    withdrawal: ["Patient withdraws consent", "Lack of efficacy", "Adverse event"],
+                    considerations: "New HIV drugs are usually tested for 'non-inferiority' against an established, effective regimen. The goal is to show the new drug is 'at least as good as' the standard, while perhaps offering benefits like better tolerability, fewer drug interactions, or a higher barrier to resistance. A non-inferiority margin (e.g., 10%) is pre-specified."
+                },
+            },
+            covid19: {
+                name: "COVID-19",
+                phase2: {
+                    title: "A Phase II, Adaptive, Randomized, Double-Blind, Placebo-Controlled Study to Evaluate the Efficacy and Safety of Drug-COV for the Treatment of Mild to Moderate COVID-19 in an Outpatient Setting",
+                    objectives: {
+                        primary: "To assess the effect of Drug-COV on viral clearance.",
+                        secondary: ["To evaluate the effect on time to symptom resolution.", "To assess the progression to severe disease.", "To evaluate safety."]
+                    },
+                    endpoints: {
+                        primary: "Change from baseline in SARS-CoV-2 viral load (e.g., from nasopharyngeal swabs) at Day 5.",
+                        secondary: ["Time to sustained resolution of a pre-defined set of COVID-19 symptoms.", "Proportion of subjects who are hospitalized or die by Day 28.", "Incidence of AEs and SAEs."]
+                    },
+                    inclusion: ["Laboratory-confirmed SARS-CoV-2 infection", "Symptom onset within 5 days", "Mild to moderate disease (not requiring hospitalization)", "At least one risk factor for progression to severe disease"],
+                    exclusion: ["Hospitalized for COVID-19", "Requires supplemental oxygen", "Known hypersensitivity to the study drug"],
+                    withdrawal: ["Patient withdraws consent", "Progression to severe disease requiring hospitalization", "Adverse event"],
+                    considerations: "During a pandemic, trial designs need to be flexible. 'Adaptive designs' allow for modifications (like dropping ineffective doses) based on interim data. Viral load is a common surrogate endpoint in Phase II, while clinical outcomes are the focus of Phase III."
+                },
+                phase3: {
+                    title: "A Phase III, Randomized, Double-Blind, Placebo-Controlled Study to Evaluate the Efficacy and Safety of Drug-COV in Preventing Hospitalization or Death in Non-Hospitalized Adults with COVID-19",
+                    objectives: {
+                        primary: "To determine if Drug-COV reduces the risk of COVID-19 related hospitalization or death.",
+                        secondary: ["To assess the effect on viral load.", "To evaluate the effect on symptom duration.", "To confirm the safety profile."]
+                    },
+                    endpoints: {
+                        primary: "Proportion of subjects who are hospitalized for COVID-19 or die from any cause by Day 28.",
+                        secondary: ["Time to negative SARS-CoV-2 PCR test.", "Time to sustained symptom alleviation.", "Incidence of SAEs."]
+                    },
+                    inclusion: ["Similar to Phase II, with a large, diverse population across multiple regions."],
+                    exclusion: ["Similar to Phase II."],
+                    withdrawal: ["Patient withdraws consent", "Lost to follow-up"],
+                    considerations: "The definitive endpoint for an outpatient COVID-19 therapeutic is a 'hard' clinical outcome: preventing the patient from getting sick enough to need hospitalization. Due to the urgency, Phase II and III trials for pandemic threats often run in parallel or overlap significantly."
+                },
+            },
+            mdd: {
+                name: "Major Depressive Disorder",
+                phase2: {
+                    title: "A Phase II, Randomized, Double-Blind, Placebo-Controlled, Fixed-Dose Study to Evaluate the Efficacy and Safety of Drug-A in Adults with Major Depressive Disorder",
+                    objectives: {
+                        primary: "To evaluate the efficacy of two fixed doses of Drug-A compared to placebo in reducing depressive symptoms.",
+                        secondary: [
+                            "To assess the time to onset of antidepressant effect.",
+                            "To evaluate the effect of Drug-A on anxiety symptoms.",
+                            "To assess the safety and tolerability of Drug-A."
+                        ]
+                    },
+                    endpoints: {
+                        primary: "Change from baseline in the Montgomery-Åsberg Depression Rating Scale (MADRS) total score at Week 8.",
+                        secondary: [
+                            "Proportion of responders (≥50% reduction in MADRS) and remitters (MADRS score ≤10).",
+                            "Change from baseline in the Hamilton Anxiety Rating Scale (HAM-A) total score.",
+                            "Incidence of treatment-emergent adverse events (TEAEs).",
+                            "Discontinuation rate due to AEs."
+                        ]
+                    },
+                    inclusion: ["Diagnosis of MDD based on DSM-5 criteria", "Age 18-65 years", "MADRS total score ≥ 22 at screening and baseline", "Current major depressive episode of at least 8 weeks duration"],
+                    exclusion: ["History of bipolar disorder, psychosis, or obsessive-compulsive disorder", "Significant suicide risk", "Treatment-resistant depression (failure of ≥2 adequate antidepressant trials)", "Substance use disorder within the last 6 months"],
+                    withdrawal: ["Patient withdraws consent", "Worsening of suicidal ideation", "Development of mania/hypomania", "Intolerable side effects"],
+                    considerations: "The placebo effect is notoriously high in MDD trials. Careful site selection, rater training, and study design (e.g., a placebo run-in period) are used to mitigate this. The MADRS is a standard clinician-rated scale for depression severity."
+                },
+                phase3: {
+                    title: "A Phase III Program of Two Identical, Randomized, Double-Blind, Placebo-Controlled, Flexible-Dose Studies to Evaluate the Efficacy and Safety of Drug-A in the Treatment of Major Depressive Disorder",
+                    objectives: {
+                        primary: "To confirm the efficacy of Drug-A compared to placebo in the acute treatment of MDD.",
+                        secondary: [
+                            "To evaluate the efficacy of Drug-A on functional impairment.",
+                            "To assess the long-term safety and tolerability in an open-label extension phase.",
+                            "To evaluate the effect on specific symptom clusters (e.g., sleep disturbance, anhedonia)."
+                        ]
+                    },
+                    endpoints: {
+                        primary: "Change from baseline in MADRS total score at Week 6.",
+                        secondary: [
+                            "Change from baseline in the Sheehan Disability Scale (SDS).",
+                            "Proportion of patients achieving remission.",
+                            "Safety and tolerability data from the long-term extension study.",
+                            "Change in relevant sub-scores of rating scales."
+                        ]
+                    },
+                    inclusion: ["Generally similar to Phase II, but with broader criteria to reflect a more general patient population."],
+                    exclusion: ["Similar to Phase II but may have more specific criteria regarding recent medication use or comorbidities."],
+                    withdrawal: ["Patient withdraws consent", "Investigator judgment that it is not in the patient's best interest to continue", "Significant adverse event", "Pregnancy"],
+                    considerations: "Regulatory agencies typically require at least two positive, adequate, and well-controlled Phase III studies for approval in MDD. The consistency of results across studies is crucial. A relapse prevention study design is also common in Phase III programs."
+                },
+            },
+            asthma: {
+                name: "Asthma",
+                phase2: {
+                    title: "A Phase IIb, Randomized, Double-Blind, Placebo-Controlled Study to Evaluate the Efficacy, Safety, and Dose Response of Inhaled Drug-B in Adult Patients with Uncontrolled, Moderate-to-Severe Asthma",
+                    objectives: {
+                        primary: "To evaluate the effect of three doses of Drug-B on lung function.",
+                        secondary: [
+                            "To assess the effect of Drug-B on asthma exacerbations.",
+                            "To evaluate the effect on asthma symptoms and rescue medication use.",
+                            "To assess safety and tolerability."
+                        ]
+                    },
+                    endpoints: {
+                        primary: "Change from baseline in morning pre-dose Forced Expiratory Volume in 1 second (FEV1) at Week 12.",
+                        secondary: [
+                            "Annualized rate of severe asthma exacerbations.",
+                            "Change from baseline in the Asthma Control Questionnaire (ACQ) score.",
+                            "Change from baseline in average daily short-acting beta-agonist (SABA) puffs.",
+                            "Incidence of AEs, particularly respiratory infections."
+                        ]
+                    },
+                    inclusion: ["Diagnosis of asthma for ≥ 12 months", "Age 18-75 years", "Pre-bronchodilator FEV1 between 40% and 80% of predicted normal", "History of ≥ 1 severe exacerbation in the past year", "On a stable dose of medium-to-high dose inhaled corticosteroid (ICS) plus a long-acting beta-agonist (LABA)"],
+                    exclusion: ["Current smoker or >10 pack-year history", "Life-threatening asthma exacerbation within 6 months", "Clinically significant lung disease other than asthma (e.g., COPD)", "Use of oral corticosteroids for >14 days within 3 months"],
+                    withdrawal: ["Patient withdraws consent", "Significant worsening of asthma requiring hospitalization", "Adverse event precluding continuation", "Pregnancy"],
+                    considerations: "FEV1 is a standard, objective measure of lung function and a common primary endpoint. Patient-reported outcomes (like ACQ) and exacerbation rates are also critically important to show a meaningful clinical benefit."
+                },
+                phase3: {
+                    title: "Two Replicate Phase III, 52-Week, Randomized, Double-Blind, Placebo-Controlled Studies to Evaluate the Efficacy and Safety of Drug-B as Add-on Therapy in Patients with Severe Eosinophilic Asthma",
+                    objectives: {
+                        primary: "To demonstrate the efficacy of Drug-B in reducing the rate of severe asthma exacerbations compared to placebo.",
+                        secondary: [
+                            "To evaluate the effect of Drug-B on lung function (FEV1).",
+                            "To assess the effect on health-related quality of life.",
+                            "To evaluate the oral corticosteroid-sparing effect of Drug-B in a sub-study.",
+                            "To assess long-term safety."
+                        ]
+                    },
+                    endpoints: {
+                        primary: "Annualized rate of severe asthma exacerbations over the 52-week treatment period.",
+                        secondary: [
+                            "Change from baseline in pre-dose FEV1 at Week 52.",
+                            "Change from baseline in the Asthma Quality of Life Questionnaire (AQLQ) score.",
+                            "Percentage reduction in final daily oral corticosteroid (OCS) dose compared to baseline (in the OCS-sparing sub-study).",
+                            "Incidence of SAEs and AEs of special interest."
+                        ]
+                    },
+                    inclusion: ["Severe asthma requiring high-dose ICS/LABA", "Specific biomarker profile (e.g., elevated blood eosinophil count ≥ 300 cells/µL)", "History of ≥ 2 severe exacerbations in the prior year"],
+                    exclusion: ["Unstable asthma at screening", "Any condition other than asthma that could affect FEV1", "History of parasitic infection (for certain biologics)"],
+                    withdrawal: ["Patient withdraws consent", "Investigator discretion due to safety or efficacy concerns", "Lost to follow-up"],
+                    considerations: "Modern asthma biologics often target specific patient phenotypes (e.g., eosinophilic asthma). The primary endpoint in Phase III shifts from lung function (FEV1) to the more clinically meaningful outcome of reducing exacerbations. OCS-sparing is a key secondary endpoint for drugs targeting severe disease."
+                },
+            },
+            migraine: {
+                name: "Migraine",
+                phase2: {
+                    title: "A Phase II, Randomized, Double-Blind, Placebo-Controlled Study to Evaluate the Efficacy and Safety of Drug-C for the Preventive Treatment of Episodic Migraine",
+                    objectives: {
+                        primary: "To evaluate the efficacy of two doses of Drug-C compared to placebo in reducing the frequency of migraine days.",
+                        secondary: [
+                            "To assess the effect of Drug-C on the use of acute migraine medication.",
+                            "To evaluate the proportion of patients with a ≥50% reduction in migraine days.",
+                            "To assess the safety and tolerability of Drug-C."
+                        ]
+                    },
+                    endpoints: {
+                        primary: "Change from baseline in the mean number of monthly migraine days (MMD) during the 12-week treatment period.",
+                        secondary: [
+                            "Change from baseline in mean monthly acute medication use days.",
+                            "Proportion of patients achieving a ≥50% reduction in MMD (50% responder rate).",
+                            "Incidence of treatment-emergent adverse events.",
+                            "Change from baseline in patient-reported disability scores (e.g., MIDAS)."
+                        ]
+                    },
+                    inclusion: ["Age 18-65 years", "Diagnosis of migraine with or without aura according to ICHD-3 criteria", "History of migraine for ≥ 12 months", "4 to 14 migraine days per month during the 4-week baseline period"],
+                    exclusion: ["Chronic migraine (≥ 15 headache days per month)", "History of cluster headache", "Medication overuse headache", "Failure of >2 previous classes of preventive migraine medications"],
+                    withdrawal: ["Patient withdraws consent", "Intolerable adverse event", "Increase in migraine frequency above a pre-specified threshold", "Pregnancy"],
+                    considerations: "Migraine trials rely heavily on patient-reported data collected via electronic diaries. A prospective baseline period (usually 1 month) is essential to establish a stable baseline frequency of migraines before randomization."
+                },
+                phase3: {
+                    title: "A Phase III, Randomized, Double-Blind, Placebo-Controlled Study to Evaluate the Efficacy and Safety of Drug-C for the Preventive Treatment of Chronic Migraine",
+                    objectives: {
+                        primary: "To confirm the efficacy of Drug-C compared to placebo in reducing the frequency of headache days in patients with chronic migraine.",
+                        secondary: [
+                            "To evaluate the effect of Drug-C on migraine-specific disability.",
+                            "To assess improvements in patient-reported quality of life.",
+                            "To evaluate the long-term safety and sustained effect in an open-label extension."
+                        ]
+                    },
+                    endpoints: {
+                        primary: "Change from baseline in the mean number of monthly headache days over the 12-week double-blind treatment period.",
+                        secondary: [
+                            "Change from baseline in mean monthly migraine days.",
+                            "Change from baseline in the Migraine Disability Assessment (MIDAS) score.",
+                            "≥50% responder rate for monthly migraine days.",
+                            "Incidence and severity of AEs over the entire study duration (including extension)."
+                        ]
+                    },
+                    inclusion: ["Diagnosis of chronic migraine (≥ 15 headache days/month, with ≥ 8 being migraine days)", "Stable pattern of headaches for at least 3 months", "Similar age and diagnostic criteria as phase II"],
+                    exclusion: ["Significant cardiovascular disease (due to mechanism of some migraine drugs)", "Uncontrolled hypertension", "Confounding pain syndromes"],
+                    withdrawal: ["Patient withdraws consent", "Lack of efficacy as per patient/investigator", "Safety concerns", "Lost to follow-up"],
+                    considerations: "Phase III often expands to include both episodic and chronic migraine populations in separate studies. The primary endpoint for chronic migraine is typically 'monthly headache days' rather than just 'monthly migraine days' to capture the full burden of the disease. Durability of effect is assessed in long-term extension phases."
+                },
+            },
+        };
+        const createListItem = (text) => `
+            <li class="flex items-start">
+                <span class="flex-shrink-0 h-6 w-6 flex items-center justify-center bg-amber-100 rounded-full mr-3">
+                    <svg class="h-4 w-4 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                </span>
+                <span>${text}</span>
+            </li>
+        `;
+        const createSection = (title, content, isList = false) => `
+            <div class="mb-6">
+                <h4 class="text-lg font-semibold text-slate-700 mb-3">${title}</h4>
+                ${isList ? `<ul class="space-y-2 text-slate-600">${content.map(createListItem).join('')}</ul>` : `<p class="text-slate-600">${content}</p>`}
+            </div>
+        `;
+        const diseaseContentContainer = document.getElementById('disease-content');
+        const welcomeScreen = document.getElementById('welcome-screen');
+        const sidebar = document.getElementById('sidebar');
+        const menuToggle = document.getElementById('menu-toggle');
+        
+        menuToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('hidden');
+        });
+        
+        function displayDiseaseContent(diseaseKey) {
+            const data = diseaseData[diseaseKey];
+            if (!data) return;
+            const content = `
+                <h2 class="text-4xl font-bold text-slate-900 mb-2">${data.name}</h2>
+                <p class="text-lg text-slate-500 mb-6">Example Protocol Designs for Phase II & III Studies</p>
+                <div class="border-b border-slate-200 mb-6">
+                    <nav class="flex space-x-6 -mb-px" aria-label="Tabs">
+                        <a href="#" class="tab-item active whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm" data-phase="phase2">Phase II Study Example</a>
+                        <a href="#" class="tab-item whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300" data-phase="phase3">Phase III Study Example</a>
+                    </nav>
+                </div>
+                <div id="phase-content">
+                    
+                </div>
+            `;
+            diseaseContentContainer.innerHTML = content;
+            displayPhaseContent(diseaseKey, 'phase2');
+            welcomeScreen.classList.add('hidden');
+            diseaseContentContainer.classList.remove('hidden');
+            setupTabs(diseaseKey);
+        }
+        function displayPhaseContent(diseaseKey, phaseKey) {
+            const phaseData = diseaseData[diseaseKey][phaseKey];
+            const phaseContentContainer = document.getElementById('phase-content');
+            const content = `
+                <div class="bg-white p-6 rounded-xl shadow-md border border-slate-200">
+                    <p class="text-sm text-slate-500 mb-4 italic">${phaseData.title}</p>
+                    <div class="grid md:grid-cols-2 gap-x-8 gap-y-4">
+                        <div>
+                            <h4 class="text-lg font-semibold text-slate-700 mb-3">Objectives</h4>
+                            <div class="pl-4 border-l-2 border-amber-300">
+                                <h5 class="font-semibold text-slate-600 mb-1">Primary</h5>
+                                <p class="text-slate-600 mb-3">${phaseData.objectives.primary}</p>
+                                <h5 class="font-semibold text-slate-600 mb-1">Secondary</h5>
+                                <ul class="list-disc list-inside space-y-1 text-slate-600">${phaseData.objectives.secondary.map(item => `<li>${item}</li>`).join('')}</ul>
+                            </div>
+                        </div>
+                        <div>
+                             <h4 class="text-lg font-semibold text-slate-700 mb-3">Endpoints</h4>
+                             <div class="pl-4 border-l-2 border-sky-300">
+                                <h5 class="font-semibold text-slate-600 mb-1">Primary</h5>
+                                <p class="text-slate-600 mb-3">${phaseData.endpoints.primary}</p>
+                                <h5 class="font-semibold text-slate-600 mb-1">Secondary</h5>
+                                <ul class="list-disc list-inside space-y-1 text-slate-600">${phaseData.endpoints.secondary.map(item => `<li>${item}</li>`).join('')}</ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-6 grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="bg-white p-6 rounded-xl shadow-md border border-slate-200">
+                        ${createSection("Inclusion Criteria", phaseData.inclusion, true)}
+                    </div>
+                     <div class="bg-white p-6 rounded-xl shadow-md border border-slate-200">
+                        ${createSection("Exclusion Criteria", phaseData.exclusion, true)}
+                    </div>
+                     <div class="bg-white p-6 rounded-xl shadow-md border border-slate-200">
+                        ${createSection("Withdrawal Criteria", phaseData.withdrawal, true)}
+                    </div>
+                </div>
+                 <div class="mt-6 bg-amber-50 border border-amber-200 text-amber-800 p-6 rounded-xl">
+                    <h4 class="text-lg font-semibold mb-2">Key Design Considerations</h4>
+                    <p>${phaseData.considerations}</p>
+                </div>
+            `;
+            phaseContentContainer.innerHTML = content;
+        }
+        function setupTabs(diseaseKey) {
+            const tabs = diseaseContentContainer.querySelectorAll('.tab-item');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    const phaseKey = tab.dataset.phase;
+                    displayPhaseContent(diseaseKey, phaseKey);
+                });
+            });
+        }
+        const sidebarItems = document.querySelectorAll('.sidebar-item');
+        sidebarItems.forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.preventDefault();
+                sidebarItems.forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+                const diseaseKey = item.dataset.disease;
+                displayDiseaseContent(diseaseKey);
+                if (window.innerWidth < 768) {
+                    sidebar.classList.add('hidden');
+                }
+            });
+        });
+        
+        const ctx = document.getElementById('phaseComparisonChart').getContext('2d');
+        const phaseComparisonChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Number of Patients', 'Duration (Months)', 'Cost (Relative)'],
+                datasets: [{
+                    label: 'Phase II',
+                    data: [200, 18, 2],
+                    backgroundColor: 'rgba(59, 130, 246, 0.6)',
+                    borderColor: 'rgba(59, 130, 246, 1)',
+                    borderWidth: 1
+                }, {
+                    label: 'Phase III',
+                    data: [2000, 48, 10],
+                    backgroundColor: 'rgba(245, 158, 11, 0.6)',
+                    borderColor: 'rgba(245, 158, 11, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        type: 'logarithmic',
+                        ticks: {
+                           callback: function(value, index, values) {
+                                if (value === 2000 || value === 200 || value === 48 || value === 18 || value === 10 || value === 2) {
+                                    return value;
+                                }
+                           }
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed.y !== null) {
+                                    if(context.label === 'Number of Patients') label += `${context.parsed.y} patients`;
+                                    else if (context.label === 'Duration (Months)') label += `${context.parsed.y} months`;
+                                    else label += `${context.parsed.y}x`;
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        
+        sidebarItems[0].click();
+        if (window.innerWidth >= 768) {
+             sidebarItems[0].classList.add('active');
+             displayDiseaseContent('hypertension');
+        } else {
+            sidebar.classList.add('hidden');
+            welcomeScreen.classList.remove('hidden');
+            diseaseContentContainer.classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
